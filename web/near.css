@@ -1,0 +1,70 @@
+/* Receipt facts use the existing review workspace's tokens; they are not editable evidence claims. */
+.chain-facts {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+}
+.chain-facts > p {
+  font-size: 13px;
+  margin: 10px 0;
+}
+.chain-facts dl > div {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr);
+  gap: 12px;
+  margin: 10px 0;
+}
+.chain-facts dd {
+  max-width: none;
+  text-align: left;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.chain-facts code,
+.source-details code {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.source-details {
+  margin-top: 18px;
+}
+.source-details summary {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 0;
+}
+.source-details p {
+  font-size: 13px;
+  margin: 8px 0;
+}
+input[readonly] {
+  background: var(--soft);
+}
+input[type="file"] {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 8px 0;
+  font: inherit;
+  font-size: 14px;
+}
+input[type="file"]::file-selector-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: inherit;
+}
+.quiet-link {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--line);
+}
+@media (max-width: 460px) {
+  .chain-facts dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+}

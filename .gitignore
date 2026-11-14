@@ -1,0 +1,16 @@
+.local/
+.release/
+node_modules/
+.cache/
+dist/
+coverage/
+target/
+.env
+.env.*
+.secrets/
+.near-credentials/
+.vercel/
+*.key
+*.pem
+*.log
+.DS_Store

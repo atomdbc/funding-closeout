@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-11-14T09:43:41.145Z",
+  "discovery": "FastNear public FT update index and public NearData block 224496486; then checked by the app through fixed archival RPC. This is not independent consensus verification.",
+  "facts": {
+    "network": "mainnet",
+    "basis": "public-rpc",
+    "provider": "https://archival-rpc.mainnet.near.org",
+    "transactionHash": "HdnpGYxucfKSz9h5xcEczEazUC51aimH45s24t3wXDMK",
+    "transactionSigner": "6d719d5af3eb0c53c99cb4b8f5798c51640a8a782e7c4a2d92ec04491220cfa9",
+    "receiptId": "9Mvr8e1KddjVSFN4MdPckHMLEK7DNRXLJLGTJBN1aB8k",
+    "blockHash": "7z5etW4CrnfgdEdtdmThoB1HVAAPkFDfUsXhF5XRymww",
+    "sender": "dclv2.ref-labs.near",
+    "recipient": "6d719d5af3eb0c53c99cb4b8f5798c51640a8a782e7c4a2d92ec04491220cfa9",
+    "tokenContract": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
+    "symbol": "USDC",
+    "decimals": 6,
+    "rawAmount": "4045481",
+    "amount": "4.045481",
+    "finalExecutionStatus": "FINAL",
+    "method": "ft_transfer",
+    "checkedAt": "2026-11-14T09:43:41.141Z",
+    "rpcResultSha256": "fb12fef4f1ed29b00bb63b1c8f322e83b0c83457feea26b6f5824ea9c6eff606"
+  },
+  "sampleOnly": "Public pre-existing third-party movement, not our payment, customer, program funding or deployment",
+  "publicChainWritesOrSignatures": false,
+  "liveBrowserHttp": {
+    "checkedAt": "2026-11-14T09:53:29.063Z",
+    "realReader": true,
+    "fixtureData": false,
+    "amount": "4.045481",
+    "importedAsUnresolved": true,
+    "unreportedBalanceRemainsNull": true,
+    "proposalRemainsNull": true,
+    "persistedThroughServerAndDatabaseRestart": true,
+    "originalRpcCheckTimePreserved": true,
+    "namedCopyReopened": true,
+    "offlineUnsignedPacketDownloaded": true,
+    "mobileNoOverflow": true
+  }
+}
