@@ -60,6 +60,16 @@ export function parseTransfer(
       "failed",
       "The transaction did not finish successfully. No payment was added; this is not a claim that no other asset moved.",
     );
+  if (
+    tx.hash === transactionHash &&
+    typeof tx.signer_id === "string" &&
+    tx.signer_id !== transactionSigner &&
+    /^[a-z0-9._-]{2,64}$/.test(tx.signer_id)
+  )
+    reject(
+      "mismatch",
+      `The returned transaction does not match this hash and transaction signer. It was signed by ${tx.signer_id}, not ${transactionSigner}. If that account paid on the treasury's behalf (a DAO, relayer or swap), open "Paid through a DAO or a relayer?" and enter ${tx.signer_id}. No payment was added.`,
+    );
   if (tx.hash !== transactionHash || tx.signer_id !== transactionSigner)
     reject(
       "mismatch",

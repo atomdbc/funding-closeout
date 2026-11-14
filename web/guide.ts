@@ -126,7 +126,7 @@ function source(state: ViewState): string {
   return `${intro("source", 1, `Paste the transaction hash of each USDC payment the treasury <strong>${e(cr.treasury)}</strong> made for this program. We look it up on NEAR mainnet and record who paid, who received it and the exact amount. Nothing is signed and no wallet is connected.`)}
   <section class="f-card">${form(state, "source", "check-transfer", f)}
     ${field(state, f, "transactionHash", "Transaction hash", "", { required: true, mono: true, placeholder: "Paste the hash (about 44 letters and numbers)", hint: "The hash only, not the explorer link." })}
-    <details class="f-more"${state.error?.form === f && state.error.field === "transactionSigner" ? " open" : ""}><summary>Paid through a DAO or a relayer?</summary>
+    <details class="f-more"${state.error?.form === f && (state.error.field === "transactionSigner" || state.error.message.includes("signed by")) ? " open" : ""}><summary>Paid through a DAO or a relayer?</summary>
       ${field(state, f, "transactionSigner", "Who signed the transaction (if not the treasury)", "", { mono: true, placeholder: "e.g. council-member.near", hint: "For Sputnik DAO payouts, the account that submitted the transaction. Leave blank otherwise. Never a key." })}
     </details>
     <div class="f-actions"><button type="submit" data-busy-label="Checking NEAR…">${svg(ic.plus)}Check on NEAR and add</button></div>
