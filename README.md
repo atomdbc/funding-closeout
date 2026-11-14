@@ -1,84 +1,64 @@
 # Funding closeout
 
-**Explain a funded program's money before proposing a return.** A 400-USDC balance is not 400 unused when 250 is still owed.
+**Close your program. Explain every USDC.** Create a review for a funded program, record the terms and payments, account for unpaid obligations and export an unsigned closeout for human review.
 
-A local prototype built for NEAR HACKATHON 2026: final mainnet USDC receipt checks, reporter explanations, outstanding obligations and an unsigned human-review packet. No wallet connection, signing, new payment, paid service or external account is needed to run it.
+This source provides a working, bounded review workflow with read-only NEAR mainnet checks. It does not connect a wallet, sign, move funds, authenticate funder approval or automatically return money. A public transfer proves movement, not purpose, ownership, work completion or legal entitlement.
 
-## What it does
+## Use your own records
 
-- Uses exact six-decimal USDC quantities with BigInt, not floating-point dollars.
-- Records terms, payment explanations, evidence references and remaining obligations.
-- Blocks a return proposal for unknown purpose, incomplete scope, unclear/fixed-award terms, cash discrepancies or uncovered commitments.
-- Starts real NEAR reviews separately from the fictional example. Checks one final issuer-backed `ft_transfer`, including the actual payer when a DAO/relayer's transaction signer differs. Checked movement fields cannot be rewritten through the app.
-- Autosaves successful edits to local SQLite, with 20 named copies and the latest 30 recovery revisions per browser workspace.
-- Reopens JSON backups as **unverified claims**. Imported NEAR facts require an explicit matching RPC recheck; review/scope declarations are cleared.
-- Downloads JSON and a self-contained, script-free HTML review packet for printing or saving as PDF.
+1. Open **Your reviews** and create a review with the program name and public NEAR treasury account.
+2. Enter actual approved funding, funding received, reported closing balance and the funding terms. Unknowns are not inferred from a transaction.
+3. Check each program USDC transaction. The app locks checked movement facts separately from your explanation/evidence references.
+4. Explain payments and record unpaid obligations, including amounts owed outside the wallet.
+5. Confirm the program/period coverage, review blockers and download the unsigned HTML packet or full JSON.
 
-It does **not** authenticate a funder decision, establish legal entitlement or automatically return funds. Movement alone does not prove purpose or work completion.
+New workspaces are empty, not fictional examples. There is no sample/demo entry or known-transaction prefill. Existing older fictional data remains honestly labeled; it is not converted into real evidence. Creating another working review is confirmed and preserves a named copy when SQLite is enabled. Reopening a copy/import clears review/scope declarations for rechecking.
 
-## Run
+## Run locally
 
 Use **Node 24.10.0**, pinned in `.nvmrc`.
 
 ```sh
-git clone https://github.com/atomdbc/funding-closeout.git
-cd funding-closeout
 npm ci --ignore-scripts --engine-strict
 npm run dev
-# Open http://127.0.0.1:5322
+# http://127.0.0.1:5322
 # If occupied: CLOSEOUT_PORT=5324 npm run dev
 ```
 
-No build step, wallet, API key or external database service is required. Node's built-in **experimental** SQLite API creates `.local/closeout.sqlite`. This is a single-machine local prototype; do not expose the server to a LAN or tunnel, or present ephemeral serverless storage as durable.
+No build, wallet, API key or npm runtime dependency is required. Node's built-in experimental SQLite warning is expected. The default is loopback-only; project-local `.local/closeout.sqlite` is private-permission plaintext, not encrypted. Successful form saves persist; unsubmitted typing does not. Access uses a rolling browser capability cookie, not a verified account/funder identity. Keep downloaded JSON backups. Clearing the cookie loses browser access. [Storage/recovery](docs/LOCAL_STORAGE.md).
 
-Local files have private permissions but are **not encrypted**. Each successful form save persists; unsubmitted typing does not. Reopen with the same browser profile and keep downloaded JSON backups. A rolling 30-day HttpOnly cookie is a workspace capability, not a verified identity. Clearing it loses browser access; there is no account-recovery service. [Storage and recovery details](docs/LOCAL_STORAGE.md).
+## Capabilities and limits
 
-## Demo: why 400 does not mean 400 returnable
+- Exact six-decimal USDC BigInt arithmetic, no USD conversion/rounding/asset mixing.
+- Missing evidence, incomplete scope, fixed/unclear terms, cash discrepancies and uncovered obligations block conditional return proposals. Zero and unknown are distinct.
+- Mainnet Circle-USDC `ft_transfer` verification, including traceable DAO/relayer actions. One unambiguous successful issuer event/action/receipt graph is required. No transfer-and-call, wrapped assets, multiple/refunded movements or full wallet-history discovery is guessed. [Receipt scope](docs/NEAR_RECEIPTS.md).
+- 20 named copies and the latest 30 recovery revisions per browser workspace. Revision protection applies across connections; history is bounded, not tamper-proof.
+- JSON import ignores supplied assessment/approval/digest and strips checked chain facts. Matching explicit RPC recheck is required. No invoice fetching or document-authenticity claim.
+- Self-contained escaped/script-free HTML review packet, JSON snapshot and browser Print/PDF. A snapshot digest identifies bytes, not authenticity or signatures.
+- Native/no-JS forms, retained validation values, busy/error feedback, light/dark responsive interface and self-hosted OFL typography.
 
-1. The **fictional** example starts with 1,000 USDC received, 400 reported cash, 250 still owed and one unexplained 50-USDC outflow. No return proposal is established.
-2. Open the unexplained payment. Classify it as a program expense, supply a fictional purpose/evidence reference, mark your review and save.
-3. Confirm complete payment and commitment scope. The proposal becomes **150 USDC**, conditional on the supplied terms and declarations—not 400 and not a funder approval.
-4. Change the support or obligations. The statement recalculates and relevant scope confirmations are revoked.
-5. Save a named copy, restore a revision, or download the unsigned review packet. JSON imports do not become trustworthy by copying a digest or approval field.
+The app trusts fixed public HTTPS archival RPC, not independent consensus/Merkle verification. Terms, balances, purpose, documents, scope and reviews remain reporter claims. No market validation, audit or contest acceptance is established.
 
-Keep the example fictional. For public chain data, start a separate empty NEAR review.
+## HTTPS/persistent-host configuration
 
-## Reproduce a real read-only mainnet check
+An explicit HTTPS public origin, exact Host/Origin enforcement, Secure `__Host-` capability cookies and configurable persistent SQLite path are implemented. Runtime rejects public binding without an explicit origin and public mode without an explicit database path. Forwarded headers are not trusted to decide origin. [Configuration and container instructions](docs/DEPLOYMENT.md).
 
-Choose **Start separate NEAR review**, confirm replacement of the working draft, and enter:
+The container recipe runs non-root, has a narrow build context and requires operator configuration. **This is not a completed production/account-based SaaS:** identity, account recovery, ownership, retention/abuse/capacity and actual TLS/host setup need review before serving private financial records. No fake login, team roles, billing or cloud-sync claim is provided. Public deployment is not automatic, and ephemeral serverless storage is not durable SQLite. A single application instance and persistent private volume are required.
 
-| Field                                    | Value                                                              |
-| ---------------------------------------- | ------------------------------------------------------------------ |
-| Program treasury / actual transfer payer | `dclv2.ref-labs.near`                                              |
-| Transaction hash                         | `HdnpGYxucfKSz9h5xcEczEazUC51aimH45s24t3wXDMK`                     |
-| Transaction signer, if different         | `6d719d5af3eb0c53c99cb4b8f5798c51640a8a782e7c4a2d92ec04491220cfa9` |
-
-Click **Check and add transfer**. Expected: **4.045481 USDC**, final successful issuer receipt, with payer and signer shown separately. Purpose stays unresolved; funding/balance stay Not entered. No new payment or private key is needed. If public RPC is unavailable/rate-limited, the app reports failure and never falls back to synthetic success.
-
-**This is a pre-existing third-party movement—not our payment, grant, customer, deployment or evidence of work fulfillment.** Actual Node and browser lookup, named-copy saving, server/SQLite restart recovery and unsigned packet download were checked separately from synthetic automated tests. [Live-check record](evidence/live-near-positive-v0.3.json). Discovery used the public FastNear FT update index and NearData block 224496486; runtime verification uses only the fixed archival RPC.
-
-Only Circle-issued NEAR mainnet USDC is supported: `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1`, six decimals. Native NEAR, bridged USDC, multiple USDC movements/refund netting, transfer-and-call and multi-action token receipts are unsupported, not guessed. [Receipt scope and trust boundary](docs/NEAR_RECEIPTS.md).
-
-## Tests
+## Checks
 
 ```sh
 npm run check
-# Without browser tests:
-npm run typecheck && npm test
-# Override installed Chrome detection:
-CHROME_PATH=/path/to/chrome npm run check
+# Or: npm run typecheck && npm test
+# Installed browser override: CHROME_PATH=/path/to/chrome npm run check
 ```
 
-**101 unit/HTTP tests and 21 browser tests** cover exact quantities, accounting blockers, malformed/ambiguous receipt rejection, protected facts, stale writes, SQLite restart/isolation, untrusted import/recheck, unsigned packets, no-JavaScript forms, accessibility and document overflow at 375/768/1280 in light/dark. Native fact panels and opened draft tools also have mobile light/dark checks.
+Checks cover exact accounting, source rejection/protection, invalid/stale forms, SQLite restart/isolation, import trust boundaries, customer creation/resume/replacement/export, no-JS, light/dark accessibility/responsiveness, public-origin/Host/cookie boundaries and configured process restart. Tests use explicitly labeled synthetic RPC transports; production start never imports their seed data. Historical actual mainnet evidence is separately recorded in `evidence/live-near-positive-v0.3.json`; it belongs to third parties, not our funding/customer/program activity, and is not a product sample feature.
 
-Browser tests require installed Chrome/Chromium; they do not download one automatically. Playwright owns port 5323, uses a private temporary database and explicitly labeled synthetic RPC fixtures. Production never imports that fixture server. Actual mainnet positive/negative checks are separate; test counts are not an audit, human acceptance or customer validation.
+Playwright uses installed Chrome/Chromium and its owned test port 5323; no automatic browser download. Test counts and local/container checks are not an independent audit, human usability acceptance or verification of an actual public TLS deployment.
 
-## Boundaries and current status
+## License / status
 
-Public HTTPS RPC is trusted, not independently consensus/Merkle-verified. Terms, balances, commitments, purpose, documents, coverage and review remain reporter claims. A digest identifies serialized snapshot bytes, not authenticity or approval. No full wallet-history discovery, document authentication, signed funder decisions or money execution exists. Local revision history is bounded and not tamper-proof. Existing grant products overlap parts of this workflow; a differentiated market gap and paid demand are not yet established.
+Original source is [MIT](LICENSE); [third-party notices](THIRD_PARTY_NOTICES.md) and bundled font OFL remain their own. The package is `private` only to prevent accidental npm publication.
 
-This release provides a working local interface. Landing-page work, further visual refinement and the human public demo video are still pending. No hosted application, event submission or award is claimed. Development uses Node/TypeScript and pinned test tools; no other application codebase or deployed contract is reused.
-
-## License
-
-Original code is [MIT licensed](LICENSE). Dependency licenses remain their own; see [third-party notices](THIRD_PARTY_NOTICES.md). The package is marked `private` to prevent accidental npm publication, not because this GitHub repository is private.
+Built for NEAR HACKATHON 2026. This source does not establish a hosted service, human public demo, event submission, eligibility, award or final consent. No reused external application/contract baseline is claimed. Submission requirements must be satisfied separately by the actual team.

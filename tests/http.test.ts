@@ -3,7 +3,7 @@ import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { once } from "node:events";
 import { request as httpRequest } from "node:http";
-import { createApp } from "../server/app.ts";
+import { createApp } from "./fixtures/app.ts";
 
 async function client(t: TestContext) {
   const server = createApp();
@@ -16,7 +16,7 @@ async function client(t: TestContext) {
   const address = server.address();
   assert(address && typeof address !== "string");
   const url = `http://127.0.0.1:${address.port}`;
-  const page = await fetch(url);
+  const page = await fetch(url + "/workspace");
   const html = await page.text();
   const cookie = page.headers.get("set-cookie")!.split(";")[0]!;
   const token = html.match(/name="token" value="([a-f0-9]+)"/)![1]!;
@@ -51,7 +51,7 @@ test("HTML app and assets are local; health states read-only on-demand NEAR chec
   const c = await client(t);
   assert.match(c.html, /Fictional example/);
   assert.match(c.html, /Not established/);
-  const page = await c.get("/");
+  const page = await c.get("/workspace");
   // no-referrer suppresses Origin on native POST navigation in Chrome.
   assert.equal(page.headers.get("referrer-policy"), "same-origin");
   assert.match(
@@ -161,7 +161,7 @@ test("user-entered HTML is text, and exports omit cookies and CSRF tokens", asyn
     policy: "return-unspent",
     termsReference: "terms",
   });
-  const html = await (await c.get("/")).text();
+  const html = await (await c.get("/workspace")).text();
   assert(!html.includes("<img src=x"));
   assert(html.includes("&lt;img"));
   const s = await c.get("/statement.json");

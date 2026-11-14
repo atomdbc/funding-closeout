@@ -35,6 +35,8 @@ export interface Commitment {
   reviewed: boolean;
 }
 export interface Program {
+  /** Empty setup state. No funding/treasury has been entered yet. */
+  setupPending?: true;
   name: string;
   asset: "USDC";
   approved: string;
@@ -118,7 +120,8 @@ export function assess(program: Program): Assessment {
   const difference = received - total - balance;
   const after = balance - owed;
   const totalsReported =
-    !program.chainReview || program.chainReview.totalsReported;
+    !program.setupPending &&
+    (!program.chainReview || program.chainReview.totalsReported);
   const blockers: string[] = [];
   if (!totalsReported)
     blockers.push(
@@ -206,6 +209,23 @@ export function validateProgram(p: Program): void {
   if (!["return-unspent", "fixed-award", "unclear"].includes(p.policy))
     throw new Error("Choose a funding policy.");
   text(p.termsReference, "Funding terms");
+  if (
+    p.setupPending !== undefined &&
+    (p.setupPending !== true ||
+      p.chainReview ||
+      p.payments.length ||
+      p.commitments.length ||
+      p.approved !== "0" ||
+      p.received !== "0" ||
+      p.balance !== "0" ||
+      p.termsReference ||
+      p.paymentsComplete ||
+      p.commitmentsComplete ||
+      p.policy !== "unclear")
+  )
+    throw new Error(
+      "An unconfigured review cannot contain financial records. Create the review first.",
+    );
   if (
     p.chainReview &&
     (p.chainReview.network !== "mainnet" ||

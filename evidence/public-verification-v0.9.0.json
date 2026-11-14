@@ -1,0 +1,24 @@
+{
+  "version": "0.9.0",
+  "verifiedAt": "2026-11-14T15:15:06.544240+00:00",
+  "scope": "Fresh allowlisted source export/install/check before public source update",
+  "command": "npm ci --ignore-scripts --engine-strict && npm run check",
+  "formatPassed": true,
+  "strictTypecheckPassed": true,
+  "unitHttpTestsPassed": 134,
+  "browserTestsPassed": 49,
+  "sourceManifestFiles": 64,
+  "sourceDigestSha256": "868524e4f59cfddab4d933e56f1b28f5df424a116e7d324fa06667f0e218562a",
+  "sourceDigestAlgorithm": "SHA256 sorted relative filename NUL file bytes NUL",
+  "originalCodeLicense": "MIT",
+  "boundaries": {
+    "publicHostDeployed": false,
+    "walletSigningOrSpending": false,
+    "accountAuthenticationImplemented": false,
+    "publicTlsBrowserVerified": false,
+    "humanAcceptance": false,
+    "eventSubmitted": false,
+    "independentAudit": false
+  },
+  "configuredServerTests": "Exact Host/Origin and secure host-only cookies; actual child-process persistent restart; tests do not assert real public TLS availability."
+}

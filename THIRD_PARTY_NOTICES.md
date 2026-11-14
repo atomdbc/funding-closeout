@@ -14,4 +14,8 @@ Pinned development dependencies:
 
 The lockfile pins transitive development dependencies; their package distributions carry their respective license notices. Unmodified packages are installed through npm, not copied into this source release. Node.js and its bundled SQLite implementation retain their respective upstream notices.
 
+## Self-hosted font in local v0.5
+
+`web/assets/hanken-grotesk-variable.ttf` is the unmodified Hanken Grotesk variable font, copyright 2021 The Hanken Grotesk Project Authors. It remains under **SIL Open Font License 1.1**, not this project's MIT license. The full notice is bundled at `web/assets/HankenGrotesk-OFL.txt`. Source: https://github.com/google/fonts/tree/main/ofl/hankengrotesk (original project https://github.com/marcologous/hanken-grotesk). Font requests are served locally, not from Google/CDN at runtime.
+
 The public sample transaction and token identifiers are blockchain facts cited for reproducibility. They are not our program funding, customer activity or an endorsement by their participants. Protocol documentation and token-issuer references are cited in `docs/NEAR_RECEIPTS.md`; no NEAR or Circle endorsement is implied.

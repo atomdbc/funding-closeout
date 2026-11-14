@@ -1,5 +1,5 @@
 // Test-only launch target. Production server/start.ts never imports this file or fake RPC data.
-import { createApp } from "../../server/app.ts";
+import { createApp } from "./app.ts";
 import { createNearReader, NearCheckError } from "../../src/near/verify.ts";
 import { fixtureTransaction, HASH } from "./near.ts";
 import { SqliteReviewRepository } from "../../server/storage.ts";

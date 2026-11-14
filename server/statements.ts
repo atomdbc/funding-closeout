@@ -6,7 +6,7 @@ export function statement(program: Program, revision: number) {
   const inputs = structuredClone(program);
   const snapshot = {
     format: "funding-closeout-v2",
-    exampleData: !inputs.chainReview,
+    exampleData: !inputs.chainReview && !inputs.setupPending,
     testFixtureData: inputs.payments.some(
       (p) =>
         p.chain?.basis === "test-fixture" ||

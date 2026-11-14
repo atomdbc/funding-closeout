@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url);
 test("unresolved payment -> evidence -> coverage -> conditional statement", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   await expect(page.locator(".proposal-amount")).toHaveText("Not established");
   const payment = page.locator("#payment-pay-unknown");
   await payment
@@ -57,7 +57,7 @@ test("unresolved payment -> evidence -> coverage -> conditional statement", asyn
 test("validation preserves edits; fixed awards never become automatic refunds", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   await page.locator("#terms > details > summary").click();
   await page.getByLabel("Program name").fill("My fictional program");
   await page.getByLabel("Approved amount", { exact: true }).fill("1e3");
@@ -87,7 +87,7 @@ test("record editing works without JavaScript and handles empty lists", async ({
 }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto("http://127.0.0.1:5323/");
+  await page.goto("http://127.0.0.1:5323/workspace");
   await page.locator("#commitments .record > summary").click();
   await page
     .locator("#commitment-due-docs")
@@ -115,7 +115,7 @@ for (const width of [375, 768, 1280]) {
       page.on("pageerror", (error) => errors.push(error.message));
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme });
-      await page.goto("/");
+      await page.goto("/workspace");
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth,
@@ -146,7 +146,11 @@ for (const width of [375, 768, 1280]) {
       expect(violations).toEqual([]);
       expect(errors).toEqual([]);
       if (width === 375 || width === 1280) {
-        await page.evaluate(() => scrollTo(0, 0));
+        await page.evaluate(() => {
+          scrollTo(0, 0);
+          const nav = document.querySelector(".section-nav");
+          if (nav) nav.scrollLeft = 0;
+        });
         await page.screenshot({
           path: `.cache/closeout-${width}-${colorScheme}.png`,
           fullPage: true,

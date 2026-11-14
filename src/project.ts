@@ -8,7 +8,7 @@ export function projectStatus() {
     nearVerification: "on-demand-public-rpc",
     nearNetwork: "mainnet",
     walletConnected: false,
-    defaultWorkspace: "fictional-example",
+    defaultWorkspace: "empty-unconfigured-review",
     deadlineUtc: "2026-11-14T23:59:00Z",
   } as const;
 }

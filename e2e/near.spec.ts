@@ -5,7 +5,8 @@ import { readFileSync } from "node:fs";
 const require = createRequire(import.meta.url);
 
 async function start(page: import("@playwright/test").Page) {
-  await page.goto("/");
+  await page.goto("/workspace");
+  await page.locator("#near-check > details > summary").click();
   await page
     .getByLabel("Program treasury account", { exact: true })
     .fill(TREASURY);

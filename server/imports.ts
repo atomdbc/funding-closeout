@@ -37,6 +37,7 @@ export function importStatement(source: string): Program {
     validateProgram(original);
     const program: Program = {
       name: original.name,
+      ...(original.setupPending ? { setupPending: true as const } : {}),
       asset: original.asset,
       approved: original.approved,
       received: original.received,

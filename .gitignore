@@ -1,4 +1,5 @@
 .local/
+.pi/skills/
 .release/
 node_modules/
 .cache/

@@ -4,7 +4,7 @@ import { once } from "node:events";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { createApp } from "../server/app.ts";
+import { createApp } from "./fixtures/app.ts";
 import { SqliteReviewRepository, StorageError } from "../server/storage.ts";
 import { statement } from "../server/statements.ts";
 import { exampleProgram } from "../src/domain/demo.ts";
@@ -46,7 +46,9 @@ async function setup(t: import("node:test").TestContext) {
     repository.close();
   };
   const load = async () => {
-    const res = await fetch(url, { headers: cookie ? { Cookie: cookie } : {} }),
+    const res = await fetch(url + "/workspace", {
+        headers: cookie ? { Cookie: cookie } : {},
+      }),
       html = await res.text();
     cookie = res.headers.get("set-cookie")!.split(";")[0]!;
     token = html.match(/name="token" value="([a-f0-9]+)"/)![1]!;

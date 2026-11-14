@@ -27,7 +27,7 @@ The app **trusts the HTTPS RPC**; it does not independently verify consensus/Mer
 
 ## Reproducible live evidence
 
-The root README gives a pre-existing public transaction for **4.045481 USDC** from `dclv2.ref-labs.near`. Actual Node reader and browser import, unresolved purpose, unknown balances, named-copy persistence, server/SQLite restart recovery and unsigned review-packet download were checked. [Live-check record](../evidence/live-near-positive-v0.3.json).
+The historical live-check record contains a pre-existing public transaction for **4.045481 USDC** from `dclv2.ref-labs.near`. It is development evidence, not a sample entry or pre-fill in the customer product. Actual Node reader and browser import, unresolved purpose, unknown balances, named-copy persistence, server/SQLite restart recovery and unsigned review-packet download were checked. [Live-check record](../evidence/live-near-positive-v0.3.json).
 
 That movement belongs to others. It is not our funding, program, deployment, customer or evidence of grant/work fulfillment. Discovery used the public FastNear FT update index and NearData block 224496486, then verification used the app's fixed archival RPC; no discovery service is required at runtime and no independent-consensus claim is made.
 

@@ -12,7 +12,7 @@ The store retains the latest **30** working revisions per browser workspace and 
 
 A random HttpOnly, SameSite=Strict, 30-day rolling cookie identifies the workspace; only its SHA-256 key is stored in SQLite. It is not a verified reviewer identity. Restart retains saved records and rotates the CSRF token. Clearing/losing the cookie loses browser access; there is no account-recovery service. Keep downloaded JSON backups outside the working database.
 
-Local filesystem access can read/alter records. Neither the history digest nor file permissions authenticate a funder or make this suitable for internet hosting. The HTTP server binds loopback only. Do not expose it over LAN/tunnels; no production authorization/hosting claim is made.
+Local filesystem access can read/alter records. Neither the history digest nor file permissions authenticate a funder or make this suitable for internet hosting. The HTTP server defaults to loopback only. Explicit public mode requires a configured HTTPS origin, secure host-only cookies and a persistent private path; see [deployment configuration](DEPLOYMENT.md). Those controls are not account authentication, encrypted storage or production acceptance. No actual hosted service is claimed.
 
 ## Untrusted JSON import
 

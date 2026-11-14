@@ -2,7 +2,7 @@ import test from "node:test";
 import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
 import { once } from "node:events";
-import { createApp } from "../server/app.ts";
+import { createApp } from "./fixtures/app.ts";
 import { parseTransfer, NearCheckError } from "../src/near/verify.ts";
 import type { TransferReader } from "../src/near/facts.ts";
 import { fixtureTransaction, HASH, TREASURY } from "./fixtures/near.ts";
@@ -29,7 +29,7 @@ async function client(
   const addr = server.address();
   assert(addr && typeof addr !== "string");
   const url = `http://127.0.0.1:${addr.port}`,
-    response = await fetch(url),
+    response = await fetch(url + "/workspace"),
     html = await response.text();
   const cookie = response.headers.get("set-cookie")!.split(";")[0]!;
   const token = html.match(/name="token" value="([a-f0-9]+)"/)![1]!;

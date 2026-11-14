@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { exampleProgram } from "../src/domain/demo.ts";
+import { emptyProgram } from "../src/domain/empty.ts";
 import { validateProgram } from "../src/domain/closeout.ts";
 import type { Program, PaymentKind, Policy } from "../src/domain/closeout.ts";
 import { units } from "../src/domain/money.ts";
@@ -24,6 +24,10 @@ import type { ReviewRepository } from "./storage.ts";
 import { importStatement } from "./imports.ts";
 import { reviewPacket } from "./packet.ts";
 import { transferReference } from "../src/near/facts.ts";
+import { renderLanding } from "../web/landing.ts";
+import { renderStart } from "../web/start.ts";
+import { guideStep, renderGuide } from "../web/guide.ts";
+import { publicOrigin as parsePublicOrigin } from "./config.ts";
 
 interface Session extends ViewState {
   owner: string;
@@ -63,12 +67,49 @@ function update(
   const p = structuredClone(program),
     id = data.get("id"),
     action = data.get("action");
-  if (action === "reset")
+  if (action === "reset") {
+    if (data.get("confirm") !== "on")
+      throw new InputError(
+        "confirm",
+        "Confirm clearing the working review. Download a backup first.",
+      );
     return {
-      program: exampleProgram(),
+      program: emptyProgram(),
       message:
-        "Fictional example reset. No on-chain records were changed. Any saved local copies and recent history are retained.",
+        "Working review cleared. Named copies and recovery history are retained. No chain records were changed.",
     };
+  }
+  if (action === "create-review") {
+    const name = text(data, "name", 100),
+      treasury = text(data, "treasury", 64);
+    if (!name) throw new InputError("name", "Enter a program name.");
+    if (!accountId(treasury))
+      throw new InputError(
+        "treasury",
+        "Enter a valid public NEAR treasury account, not a key or URL.",
+      );
+    if (!p.setupPending && data.get("confirm") !== "on")
+      throw new InputError(
+        "confirm",
+        "Confirm creating another working review. Keep a backup of the current review.",
+      );
+    const review = newNearReview(treasury);
+    review.name = name;
+    return {
+      program: review,
+      message:
+        "Review created. Enter the actual funding terms and reported totals. No transactions, funding or balance have been assumed.",
+    };
+  }
+  if (
+    p.setupPending &&
+    !["import-statement", "open-copy", "restore-revision"].includes(
+      action ?? "",
+    )
+  )
+    throw new Error(
+      "Create a review from Reviews before entering financial records.",
+    );
   if (action === "start-near") {
     if (data.get("confirm") !== "on")
       throw new InputError(
@@ -194,13 +235,20 @@ function update(
 
 /** Loopback-only review app. Fixed public read-only NEAR RPC; no wallet, signing or arbitrary URL fetches. */
 export function createApp(
-  options: { reader?: TransferReader; repository?: ReviewRepository } = {},
+  options: {
+    reader?: TransferReader;
+    repository?: ReviewRepository;
+    initialProgram?: Program;
+    publicOrigin?: string;
+  } = {},
 ) {
+  const configuredOrigin = parsePublicOrigin(options.publicOrigin);
   const reader = options.reader ?? createNearReader();
   const repository = options.repository;
   function view(s: Session): ViewState {
     return {
       ...s,
+      hosted: !!configuredOrigin,
       archive: repository
         ? {
             copies: repository.copies(s.owner),
@@ -217,6 +265,13 @@ export function createApp(
     readFileSync(new URL("../web/near.css", import.meta.url)),
   ]);
   const js = readFileSync(new URL("../web/app.js", import.meta.url));
+  const landingCss = readFileSync(
+    new URL("../web/landing.css", import.meta.url),
+  );
+  const landingJs = readFileSync(new URL("../web/landing.js", import.meta.url));
+  const landingFont = readFileSync(
+    new URL("../web/assets/hanken-grotesk-variable.ttf", import.meta.url),
+  );
   const server = createServer(
     { maxHeaderSize: 8192, requestTimeout: 10000 },
     (request, response) => {
@@ -235,7 +290,7 @@ export function createApp(
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "same-origin",
       "Content-Security-Policy":
-        "default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+        "default-src 'none'; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
     });
     response.end(body);
   }
@@ -243,15 +298,54 @@ export function createApp(
     try {
       const address = server.address(),
         port = typeof address === "object" && address ? address.port : 5322;
-      const hosts = [`127.0.0.1:${port}`, `localhost:${port}`];
+      const hosts = configuredOrigin
+        ? [new URL(configuredOrigin).host]
+        : [`127.0.0.1:${port}`, `localhost:${port}`];
+      const origins = configuredOrigin
+        ? [configuredOrigin]
+        : hosts.map((h) => `http://${h}`);
+      if (configuredOrigin)
+        response.setHeader("Strict-Transport-Security", "max-age=31536000");
       if (!hosts.includes(request.headers.host ?? ""))
         return send(
           response,
           403,
           "text/plain",
-          "Use the loopback address printed by npm run dev.",
+          configuredOrigin
+            ? "Use the configured public origin."
+            : "Use the loopback address printed by npm run dev.",
         );
       const path = request.url?.split("?")[0];
+      const query = new URL(request.url ?? "/", "http://localhost")
+        .searchParams;
+      let flow: ReturnType<typeof guideStep> | undefined;
+      const returningToReviews = query.get("return") === "reviews";
+      try {
+        if (path === "/guided") flow = guideStep(query);
+        if (path === "/edit" && query.has("flow"))
+          flow = guideStep(query, "flow");
+        if (flow) {
+          if (query.has("sample"))
+            throw new Error(
+              "Sample inputs are not supported. Enter your own program records.",
+            );
+        }
+      } catch (error) {
+        return send(
+          response,
+          400,
+          "text/plain",
+          error instanceof Error
+            ? error.message
+            : "Choose a valid review step.",
+        );
+      }
+      const present = (state: ViewState) =>
+        path === "/app" || returningToReviews
+          ? renderStart(state)
+          : flow
+            ? renderGuide(state, flow)
+            : render(state);
       const expectedMethod = path === "/edit" ? "POST" : "GET";
       if (request.method !== expectedMethod) {
         response.setHeader("Allow", expectedMethod);
@@ -267,17 +361,49 @@ export function createApp(
             storage: repository ? "local-sqlite" : "session-memory",
           }),
         );
+      if (path === "/welcome.css")
+        return send(response, 200, "text/css; charset=utf-8", landingCss);
+      if (path === "/landing.js")
+        return send(response, 200, "text/javascript; charset=utf-8", landingJs);
+      if (path === "/assets/hanken-grotesk-variable.ttf")
+        return send(response, 200, "font/ttf", landingFont);
+      if (path === "/welcome") {
+        const query = new URL(request.url!, "http://localhost").search;
+        response.writeHead(308, {
+          Location: `/${query}`,
+          "Cache-Control": "no-store",
+        });
+        return response.end();
+      }
+      if (path === "/") {
+        if (query.has("case"))
+          return send(
+            response,
+            400,
+            "text/plain",
+            "Example scenarios are no longer available. Start your review at /app.",
+          );
+        return send(response, 200, "text/html; charset=utf-8", renderLanding());
+      }
       if (path === "/app.css")
         return send(response, 200, "text/css; charset=utf-8", css);
       if (path === "/app.js")
         return send(response, 200, "text/javascript; charset=utf-8", js);
       if (
-        !["/", "/edit", "/statement.json", "/review.html"].includes(path ?? "")
+        ![
+          "/app",
+          "/workspace",
+          "/guided",
+          "/edit",
+          "/statement.json",
+          "/review.html",
+        ].includes(path ?? "")
       )
         return send(response, 404, "text/plain", "Page not found. Return to /");
       const now = Date.now();
       for (const [id, s] of sessions) if (s.expires <= now) sessions.delete(id);
-      const cookieName = repository ? "closeout_saved" : "closeout";
+      const cookieName = `${configuredOrigin ? "__Host-" : ""}${repository ? "closeout_saved" : "closeout"}`;
+      const secureCookie = configuredOrigin ? "; Secure" : "";
       const cookie = request.headers.cookie
         ?.split(";")
         .map((v) => v.trim())
@@ -309,7 +435,7 @@ export function createApp(
             response,
             409,
             "text/plain",
-            "Your local session expired. Open / to start again; no changes were applied.",
+            "Your local session expired. Open /app to resume or start a review; no changes were applied.",
           );
         if (sessions.size >= 64)
           return send(
@@ -320,7 +446,7 @@ export function createApp(
           );
         const id = randomBytes(24).toString("hex");
         session = {
-          program: exampleProgram(),
+          program: structuredClone(options.initialProgram ?? emptyProgram()),
           owner: ownerKey(id),
           revision: 1,
           token: randomBytes(24).toString("hex"),
@@ -331,19 +457,21 @@ export function createApp(
           undefined,
           session.program,
           1,
-          "Start fictional example",
+          options.initialProgram
+            ? "Load explicit test fixture"
+            : "Initialize empty review",
         );
         sessions.set(id, session);
         response.setHeader(
           "Set-Cookie",
-          `${cookieName}=${id}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${repository ? 2592000 : 28800}`,
+          `${cookieName}=${id}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${repository ? 2592000 : 28800}${secureCookie}`,
         );
       }
       session.expires = now + 8 * 60 * 60 * 1000;
       if (cookie && sessions.get(cookie) === session) {
         response.setHeader(
           "Set-Cookie",
-          `${cookieName}=${cookie}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${repository ? 2592000 : 28800}`,
+          `${cookieName}=${cookie}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${repository ? 2592000 : 28800}${secureCookie}`,
         );
       }
       if (repository) {
@@ -380,16 +508,12 @@ export function createApp(
         );
       }
       if (path === "/edit") {
-        if (
-          !hosts
-            .map((h) => `http://${h}`)
-            .includes(request.headers.origin ?? "")
-        )
+        if (!origins.includes(request.headers.origin ?? ""))
           return send(
             response,
             403,
             "text/plain",
-            "Only forms from this local review page may make changes.",
+            "Only forms from this review's configured origin may make changes.",
           );
         if (
           request.headers["content-type"]?.split(";")[0] !==
@@ -475,10 +599,12 @@ export function createApp(
             }
             session.message =
               action === "save-copy"
-                ? "Named copy saved on this computer. Keep a downloaded backup too."
+                ? configuredOrigin
+                  ? "Named copy saved on this server. Keep a downloaded backup too."
+                  : "Named copy saved on this computer. Keep a downloaded backup too."
                 : "Saved copy deleted. The working draft and recent history are unchanged.";
             response.writeHead(303, {
-              Location: "/#saved-work",
+              Location: returningToReviews ? "/app" : "/workspace#saved-work",
               "Cache-Control": "no-store",
             });
             return response.end();
@@ -617,6 +743,21 @@ export function createApp(
               session.checking = false;
             }
           } else result = update(session.program, data);
+          if (configuredOrigin)
+            result.message = result.message.replace(
+              /^Saved locally\./,
+              "Saved on server.",
+            );
+          if (
+            action === "create-review" &&
+            !session.program.setupPending &&
+            repository
+          )
+            repository.saveCopy(
+              session.owner,
+              session.revision,
+              session.program.name.slice(0, 100),
+            );
           repository?.commit(
             session.owner,
             session.revision,
@@ -628,7 +769,14 @@ export function createApp(
           session.revision += 1;
           session.message = result.message;
           response.writeHead(303, {
-            Location: `/#${encodeURIComponent(data.get("action") === "check-transfer" ? `payment-${result.program.payments.at(-1)!.id}` : form)}`,
+            Location:
+              action === "create-review"
+                ? "/guided?step=terms"
+                : returningToReviews
+                  ? "/app"
+                  : flow
+                    ? `/guided?step=${action === "check-transfer" ? "payments" : flow}`
+                    : `/workspace#${encodeURIComponent(action === "check-transfer" ? `payment-${result.program.payments.at(-1)!.id}` : form)}`,
             "Cache-Control": "no-store",
           });
           return response.end();
@@ -649,7 +797,7 @@ export function createApp(
                   ? 503
                   : 422,
             "text/html; charset=utf-8",
-            render({
+            present({
               ...view(session),
               error: {
                 form,
@@ -661,7 +809,14 @@ export function createApp(
           );
         }
       }
-      const html = render(view(session));
+      if (path === "/guided" && session.program.setupPending) {
+        response.writeHead(303, {
+          Location: "/app",
+          "Cache-Control": "no-store",
+        });
+        return response.end();
+      }
+      const html = present(view(session));
       delete session.message;
       return send(response, 200, "text/html; charset=utf-8", html);
     } catch (error) {

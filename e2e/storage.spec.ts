@@ -19,7 +19,7 @@ async function tools(page: import("@playwright/test").Page) {
 test("named copy reopens independently of the current edited draft", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   await tools(page);
   await page
     .getByLabel("Saved copy name", { exact: true })
@@ -58,7 +58,7 @@ test("named copy reopens independently of the current edited draft", async ({
 test("selected JSON file loads locally and imports only after explicit confirmation", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   await tools(page);
   const p = exampleProgram();
   p.name = "Reopened from backup";
@@ -93,7 +93,7 @@ test("selected JSON file loads locally and imports only after explicit confirmat
 test("oversized selected file is not silently replaced by a previously selected file", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   await tools(page);
   await page
     .locator("#statement-source")
@@ -120,7 +120,7 @@ test("imported NEAR proof is visibly unverified until explicit fixture recheck",
       "2026-11-14T08:00:00Z",
     ),
     p = addCheckedTransfer(newNearReview(TREASURY), f);
-  await page.goto("/");
+  await page.goto("/workspace");
   await tools(page);
   await page.locator("#statement-source").fill(JSON.stringify(statement(p, 2)));
   await page
@@ -157,7 +157,7 @@ for (const colorScheme of ["light", "dark"] as const) {
   }) => {
     await page.setViewportSize({ width: 375, height: 850 });
     await page.emulateMedia({ colorScheme });
-    await page.goto("/");
+    await page.goto("/workspace");
     await tools(page);
     expect(
       await page.evaluate(
@@ -194,7 +194,7 @@ test("JSON paste import works without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   try {
-    await page.goto("http://127.0.0.1:5323/");
+    await page.goto("http://127.0.0.1:5323/workspace");
     await tools(page);
     const p = exampleProgram();
     p.name = "No-JS backup restore";
@@ -219,7 +219,7 @@ test("JSON paste import works without JavaScript", async ({ browser }) => {
 test("review packet downloads a self-contained script-free unsigned document", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workspace");
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page

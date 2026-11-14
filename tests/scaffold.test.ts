@@ -9,5 +9,5 @@ test("prototype capability flags distinguish local features from NEAR and wallet
   assert.equal(status.nearReadOnlyEnabled, true);
   assert.equal(status.nearVerification, "on-demand-public-rpc");
   assert.equal(status.walletConnected, false);
-  assert.equal(status.defaultWorkspace, "fictional-example");
+  assert.equal(status.defaultWorkspace, "empty-unconfigured-review");
 });
