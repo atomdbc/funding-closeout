@@ -4,6 +4,12 @@
 
 This source provides a working, bounded review workflow with read-only NEAR mainnet checks. It does not connect a wallet, sign, move funds, authenticate funder approval or automatically return money. A public transfer proves movement, not purpose, ownership, work completion or legal entitlement.
 
+## Hosted application
+
+**https://funding-closeout.vercel.app** — hosted on Vercel with a separate private encrypted Blob store. New visitors start empty; no wallet connection or product sample is required. Browser capability access is not an account login; keep downloaded backups. No paid-plan upgrade or on-chain write is required.
+
+Actual HTTPS customer-flow, public read-only RPC, export, cold-browser resume, independent-browser isolation, secure-cookie, invalid-Origin/duplicate-body rejection and concurrent-write checks were run with isolated, explicitly synthetic QA program inputs. Those checks are not human acceptance, an audit, customer activity, funding or a submitted contest entry.
+
 ## Use your own records
 
 1. Open **Your reviews** and create a review with the program name and public NEAR treasury account.
@@ -25,7 +31,7 @@ npm run dev
 # If occupied: CLOSEOUT_PORT=5324 npm run dev
 ```
 
-No build, wallet, API key or npm runtime dependency is required. Node's built-in experimental SQLite warning is expected. The default is loopback-only; project-local `.local/closeout.sqlite` is private-permission plaintext, not encrypted. Successful form saves persist; unsubmitted typing does not. Access uses a rolling browser capability cookie, not a verified account/funder identity. Keep downloaded JSON backups. Clearing the cookie loses browser access. [Storage/recovery](docs/LOCAL_STORAGE.md).
+Local mode requires no build, wallet or RPC API key. The pinned Vercel Blob SDK is used only by the Vercel adapter. Node's built-in experimental SQLite warning is expected. The default is loopback-only; project-local `.local/closeout.sqlite` is private-permission plaintext, not encrypted. Successful form saves persist; unsubmitted typing does not. Access uses a rolling browser capability cookie, not a verified account/funder identity. Keep downloaded JSON backups. Clearing the cookie loses browser access. [Storage/recovery](docs/LOCAL_STORAGE.md).
 
 ## Capabilities and limits
 
@@ -38,6 +44,14 @@ No build, wallet, API key or npm runtime dependency is required. Node's built-in
 - Native/no-JS forms, retained validation values, busy/error feedback, light/dark responsive interface and self-hosted OFL typography.
 
 The app trusts fixed public HTTPS archival RPC, not independent consensus/Merkle verification. Terms, balances, purpose, documents, scope and reviews remain reporter claims. No market validation, audit or contest acceptance is established.
+
+## Vercel persistence
+
+Vercel uses the separate Node function adapter and a **private Blob store**, not SQLite on the temporary function filesystem. Saved work is AES-256-GCM encrypted with an operator-held key and bound to the workspace path; this is server-side encryption, not end-to-end privacy or funder authentication. Conditional ETag writes prevent concurrent overwrites. Origin-bound CSRF survives cold starts. Receipt-check limits persist across instances.
+
+Hosted capacity is bounded: 128 browser workspaces, 1 MiB plaintext per workspace, up to 20 pinned copies and up to 30 recovery revisions within that budget. Older recovery entries may be pruned to stay within capacity; pinned copies are not silently deleted. The store does not expire records automatically. Free provider quotas are finite/shared at account level; exhausted quota fails saves honestly and may make the service unavailable. Keep private downloaded backups. No paid-plan upgrade is performed by code.
+
+Production requires the project's private `BLOB_READ_WRITE_TOKEN` and a separate sensitive 32-byte hex `CLOSEOUT_DATA_KEY`. Keys/tokens must never be committed or exposed to the browser. Key loss/rotation without migration can make saved records unreadable. Deploy from a reviewed allowlist, not a private workspace/database. No product sample/prefill is added by this adapter.
 
 ## HTTPS/persistent-host configuration
 

@@ -1,5 +1,5 @@
 {
-  "version": "0.9.0",
+  "version": "0.10.0",
   "originalCodeLicense": "MIT",
   "description": "Explicit source allowlist. Checksums identify bytes, not an audit or authenticity certificate. No local databases, drafts, private history, internal notes or raw research included.",
   "files": [
@@ -9,7 +9,7 @@
     },
     {
       "path": ".gitignore",
-      "sha256": "802363586c1cd69dd132055cede12886be7cc11553fdd7ff8807e4fdbd419930"
+      "sha256": "66cf70aae86a29675c35cf34034ce72d1ae6ffca88c46cd6842d1ea13815db49"
     },
     {
       "path": ".npmrc",
@@ -20,12 +20,36 @@
       "sha256": "204f09a46271f9788396f90cb21ea2897cafe7ecf49832b6d0e49bd3bc38000b"
     },
     {
+      "path": ".vercelignore",
+      "sha256": "e71ceab30eeb076ec5442a31dee5b07f227dee6fe405c973a97e17077f4ccca9"
+    },
+    {
       "path": "Dockerfile",
       "sha256": "51dea17b0c847a74c3b8deca0c334e88bb916e5f3b5d1f271c720ff02c589cda"
     },
     {
+      "path": "LICENSE",
+      "sha256": "a614448c916f71fe11a8b559544d4cfc7ebf52881f1bedb44e953541a465d0ac"
+    },
+    {
+      "path": "README.md",
+      "sha256": "7b583c525dae375f88c36ab177e3030da6c43dae664faf8433fb251d66267c81"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "e8264d316c0f297bdb692ac4a09d3402f98652396b4017eb757e5881019e6c39"
+    },
+    {
+      "path": "api/app.ts",
+      "sha256": "6f1d634a2b9771cd64d7fdfe2be8c1f8a5aa423d012de06d7b4ec4981c0e9a6b"
+    },
+    {
+      "path": "api/tsconfig.json",
+      "sha256": "c520e618dae05af61502d86aef9f178866b2186b7b8636de0e56f8d7fb12df88"
+    },
+    {
       "path": "docs/DEPLOYMENT.md",
-      "sha256": "c70a62be033f4b7ce42ae91793f4a973ccfbdba727a9e69e65e2a674318dc96e"
+      "sha256": "937ef2b9aaba6c5d642d600a23ff61cf85a1ff4b368bb21326dfe71ce0847b94"
     },
     {
       "path": "docs/LOCAL_STORAGE.md",
@@ -64,28 +88,28 @@
       "sha256": "9c4e9ec1021b2e4d54371e10a5b6d9d554392507d83a0f1d02396d4997d50086"
     },
     {
-      "path": "LICENSE",
-      "sha256": "a614448c916f71fe11a8b559544d4cfc7ebf52881f1bedb44e953541a465d0ac"
-    },
-    {
       "path": "package-lock.json",
-      "sha256": "a58109487c4469f8810b77390c1d6b415a69c115d4abb57035c175e520d44ae2"
+      "sha256": "0473722e223cb9ebbac5757d2c41e59f79d66b13563b7557a345ecfae4167e72"
     },
     {
       "path": "package.json",
-      "sha256": "c0bb1847f713058c253142ede0041e4f8b1c1626710d72fc85c8742e27fce1a5"
+      "sha256": "1aed3e45cbcad81f5bdc308aeb4797baebafb963c83bac156f05aaeab4e9d62e"
     },
     {
       "path": "playwright.config.ts",
       "sha256": "58ecd422e24ebcda5437ac5f86969248fe634f3a1dfc135400c14c9d7e19ad12"
     },
     {
-      "path": "README.md",
-      "sha256": "27f2062c40e00946db87d356eb54fa5bd5cbedafd085d07f83885756f08d0acc"
+      "path": "scripts/build-vercel.mjs",
+      "sha256": "84795e37f758e9384e1a4ce089d9081620608ff43c6a0d3c4227c79a4d81f046"
     },
     {
       "path": "server/app.ts",
-      "sha256": "d9ddc4e81dbb4de0fbd0367cdb31c54637d1a422a1577484553dae6331c25bf7"
+      "sha256": "ec3c1b80225f864f843eebe0f683edfa0ebd40665e02c87b6c75ac6423c6fdc6"
+    },
+    {
+      "path": "server/blob-storage.ts",
+      "sha256": "211d29a002380d041fbaff36f87a861e56fe1826ef9df9c619b71f0ee1b9d6f9"
     },
     {
       "path": "server/config.ts",
@@ -109,7 +133,11 @@
     },
     {
       "path": "server/storage.ts",
-      "sha256": "5b1c848a011f67779f6c96e7af7057476f32ca69ddcc3514a4ce6bc54b046458"
+      "sha256": "316d587899a896ee1811c5781a388e72ee08f8fb6b5e71483b70d377497f51f9"
+    },
+    {
+      "path": "server/vercel-handler.ts",
+      "sha256": "2d45ae82f19040ef940a928421a1524bef3212a737fbe7354e5c0f73c1e10545"
     },
     {
       "path": "src/domain/closeout.ts",
@@ -142,6 +170,10 @@
     {
       "path": "src/project.ts",
       "sha256": "b69f39dd99c39482bdc801cbb22272e3ca437564874d02b4f1c7abac3bfc3051"
+    },
+    {
+      "path": "tests/blob-storage.test.ts",
+      "sha256": "d300a5ae9d2f3db0eff3b759d2de4baddb1a60da898193feefa023a9ef77f427"
     },
     {
       "path": "tests/closeout.test.ts",
@@ -204,16 +236,20 @@
       "sha256": "24bdaf6bd21f138d897e3ab6c1ff234ceb699e5ce9e2c46a7342d9364c21a041"
     },
     {
+      "path": "tests/vercel-routing.test.ts",
+      "sha256": "3dd6cf9aad36690ad0394472bd15016c04f490654122bfedcd95c3277252e52d"
+    },
+    {
       "path": "tests/workspace.test.ts",
       "sha256": "08461086422e8d04e0e68eac0dfb50588e173d62edfc701793ad41544cf4de9b"
     },
     {
-      "path": "THIRD_PARTY_NOTICES.md",
-      "sha256": "37d302b6c7d281b68e6543fbbee4afd58d86c760882c169ab66dff20613c1c51"
+      "path": "tsconfig.json",
+      "sha256": "f35dabe3d2160259ed01af7ffcb09865f0429d00bdb951503cd8d4a4ffb54750"
     },
     {
-      "path": "tsconfig.json",
-      "sha256": "cb49fd0d448324cb274c3813bf0a42e6dbf13c4c77469ec83b0b1626f6d19ecb"
+      "path": "vercel.json",
+      "sha256": "66204244d5cd9902d18b6087ce18c9af5b43e6dbaed03b4f31a952a136fab2cd"
     },
     {
       "path": "web/app.css",
@@ -224,24 +260,24 @@
       "sha256": "bce729971c6fed71afe771d09ca597dfb066daa2db888a056f619b6b7beb5313"
     },
     {
-      "path": "web/assets/hanken-grotesk-variable.ttf",
-      "sha256": "813b3f8fa0965405669a89b38e51bbefd95eef6b8e20d1cb2d8c10cce062662f"
-    },
-    {
       "path": "web/assets/HankenGrotesk-OFL.txt",
       "sha256": "e02ccb89a86839b22feff7872ff5cc355cc0f58318d29eee20e2cf83a612f16d"
+    },
+    {
+      "path": "web/assets/hanken-grotesk-variable.ttf",
+      "sha256": "813b3f8fa0965405669a89b38e51bbefd95eef6b8e20d1cb2d8c10cce062662f"
     },
     {
       "path": "web/guide.ts",
       "sha256": "254f735eff1c3d7ea1f470f7aaf697bf4b4ee9affbc60da6cda9ce6ddd466d2b"
     },
     {
-      "path": "web/landing.css",
-      "sha256": "51de753182d6c925399e8d6f986ceeeaee1fea6231e5812f7f284715d729f4cd"
+      "path": "web/landing-client.js",
+      "sha256": "e0363c88fc56443c73b99c01685c1d89ad9cd2a5202272163eaeca28189df7cf"
     },
     {
-      "path": "web/landing.js",
-      "sha256": "e0363c88fc56443c73b99c01685c1d89ad9cd2a5202272163eaeca28189df7cf"
+      "path": "web/landing.css",
+      "sha256": "51de753182d6c925399e8d6f986ceeeaee1fea6231e5812f7f284715d729f4cd"
     },
     {
       "path": "web/landing.ts",
@@ -253,11 +289,11 @@
     },
     {
       "path": "web/start.ts",
-      "sha256": "42159863ece79aab9bb1c2513449b5a916b744c8d48a074fdd321c1b58dca513"
+      "sha256": "9bbe3c5433a49187cf40b51b4d77d197f6813e32abd6c21843d69de14a0503b2"
     },
     {
       "path": "web/view.ts",
-      "sha256": "20a97e31e1c72832355a179e5e36de410d01185a8e33c4fe43bc79bfbf414b4c"
+      "sha256": "8b07b48924a19a0943c236913463b57fc531260a45a964523afe1a2bd3485a75"
     }
   ]
 }

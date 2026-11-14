@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { emptyProgram } from "../src/domain/empty.ts";
 import { validateProgram } from "../src/domain/closeout.ts";
 import type { Program, PaymentKind, Policy } from "../src/domain/closeout.ts";
@@ -240,38 +241,41 @@ export function createApp(
     repository?: ReviewRepository;
     initialProgram?: Program;
     publicOrigin?: string;
+    csrfToken?: (cookie: string) => string;
+    assetsRoot?: string;
   } = {},
 ) {
   const configuredOrigin = parsePublicOrigin(options.publicOrigin);
   const reader = options.reader ?? createNearReader();
   const repository = options.repository;
-  function view(s: Session): ViewState {
+  async function view(s: Session): Promise<ViewState> {
     return {
       ...s,
       hosted: !!configuredOrigin,
+      cloudStorage: repository?.kind === "private-blob",
       archive: repository
         ? {
-            copies: repository.copies(s.owner),
-            history: repository.history(s.owner),
+            copies: await repository.copies(s.owner),
+            history: await repository.history(s.owner),
           }
         : undefined,
     };
   }
+  const asset = (name: string) =>
+    options.assetsRoot
+      ? join(options.assetsRoot, name)
+      : new URL("../web/" + name, import.meta.url);
   const checks: number[] = [];
   const sessions = new Map<string, Session>();
   const css = Buffer.concat([
-    readFileSync(new URL("../web/app.css", import.meta.url)),
+    readFileSync(asset("app.css")),
     Buffer.from("\n"),
-    readFileSync(new URL("../web/near.css", import.meta.url)),
+    readFileSync(asset("near.css")),
   ]);
-  const js = readFileSync(new URL("../web/app.js", import.meta.url));
-  const landingCss = readFileSync(
-    new URL("../web/landing.css", import.meta.url),
-  );
-  const landingJs = readFileSync(new URL("../web/landing.js", import.meta.url));
-  const landingFont = readFileSync(
-    new URL("../web/assets/hanken-grotesk-variable.ttf", import.meta.url),
-  );
+  const js = readFileSync(asset("app.js"));
+  const landingCss = readFileSync(asset("landing.css"));
+  const landingJs = readFileSync(asset("landing-client.js"));
+  const landingFont = readFileSync(asset("assets/hanken-grotesk-variable.ttf"));
   const server = createServer(
     { maxHeaderSize: 8192, requestTimeout: 10000 },
     (request, response) => {
@@ -358,7 +362,9 @@ export function createApp(
           "application/json",
           JSON.stringify({
             ...projectStatus(),
-            storage: repository ? "local-sqlite" : "session-memory",
+            storage: repository
+              ? (repository.kind ?? "local-sqlite")
+              : "session-memory",
           }),
         );
       if (path === "/welcome.css")
@@ -411,12 +417,13 @@ export function createApp(
         ?.slice(cookieName.length + 1);
       let session = cookie ? sessions.get(cookie) : undefined;
       if (!session && cookie && /^[a-f0-9]{48}$/.test(cookie) && repository) {
-        const saved = repository.load(ownerKey(cookie));
+        const saved = await repository.load(ownerKey(cookie));
         if (saved) {
           session = {
             ...saved,
             owner: ownerKey(cookie),
-            token: randomBytes(24).toString("hex"),
+            token:
+              options.csrfToken?.(cookie) ?? randomBytes(24).toString("hex"),
             expires: now + 8 * 60 * 60 * 1000,
           };
           if (sessions.size >= 64)
@@ -449,10 +456,10 @@ export function createApp(
           program: structuredClone(options.initialProgram ?? emptyProgram()),
           owner: ownerKey(id),
           revision: 1,
-          token: randomBytes(24).toString("hex"),
+          token: options.csrfToken?.(id) ?? randomBytes(24).toString("hex"),
           expires: now + 8 * 60 * 60 * 1000,
         };
-        repository?.commit(
+        await repository?.commit(
           session.owner,
           undefined,
           session.program,
@@ -475,7 +482,7 @@ export function createApp(
         );
       }
       if (repository) {
-        const latest = repository.load(session.owner);
+        const latest = await repository.load(session.owner);
         if (!latest)
           throw new StorageError(
             "The local review is unavailable; no replacement was created.",
@@ -584,7 +591,7 @@ export function createApp(
                 "Saved copies are unavailable in this temporary test session.",
               );
             if (action === "save-copy")
-              repository.saveCopy(
+              await repository.saveCopy(
                 session.owner,
                 session.revision,
                 text(data, "copyName", 100),
@@ -595,7 +602,10 @@ export function createApp(
                   "confirm",
                   "Confirm deletion of this saved copy. The current working draft is not deleted.",
                 );
-              repository.deleteCopy(session.owner, text(data, "copyId", 80));
+              await repository.deleteCopy(
+                session.owner,
+                text(data, "copyId", 80),
+              );
             }
             session.message =
               action === "save-copy"
@@ -632,8 +642,11 @@ export function createApp(
                 );
               const previous =
                 action === "open-copy"
-                  ? repository.copy(session.owner, text(data, "copyId", 80))
-                  : repository.historical(
+                  ? await repository.copy(
+                      session.owner,
+                      text(data, "copyId", 80),
+                    )
+                  : await repository.historical(
                       session.owner,
                       Number(data.get("historyRevision")),
                     );
@@ -690,6 +703,7 @@ export function createApp(
               throw new Error(
                 "Receipt checks are temporarily rate limited. Wait before trying again; no payment was added.",
               );
+            await repository?.reserveCheck?.(session.owner, started);
             checks.push(started);
             session.lastCheck = started;
             session.checking = true;
@@ -753,12 +767,12 @@ export function createApp(
             !session.program.setupPending &&
             repository
           )
-            repository.saveCopy(
+            await repository.saveCopy(
               session.owner,
               session.revision,
               session.program.name.slice(0, 100),
             );
-          repository?.commit(
+          await repository?.commit(
             session.owner,
             session.revision,
             result.program,
@@ -798,7 +812,7 @@ export function createApp(
                   : 422,
             "text/html; charset=utf-8",
             present({
-              ...view(session),
+              ...(await view(session)),
               error: {
                 form,
                 field: error instanceof InputError ? error.field : "",
@@ -816,7 +830,7 @@ export function createApp(
         });
         return response.end();
       }
-      const html = present(view(session));
+      const html = present(await view(session));
       delete session.message;
       return send(response, 200, "text/html; charset=utf-8", html);
     } catch (error) {

@@ -20,21 +20,24 @@ export interface HistoryEntry {
   action: string;
   digest: string;
 }
+type Awaitable<T> = T | Promise<T>;
 export interface ReviewRepository {
-  load(owner: string): StoredReview | undefined;
+  readonly kind?: "local-sqlite" | "private-blob";
+  reserveCheck?(owner: string, now: number): Promise<void>;
+  load(owner: string): Awaitable<StoredReview | undefined>;
   commit(
     owner: string,
     expected: number | undefined,
     program: Program,
     revision: number,
     action: string,
-  ): void;
-  copies(owner: string): SavedCopy[];
-  saveCopy(owner: string, expected: number, name: string): void;
-  copy(owner: string, id: string): Program;
-  deleteCopy(owner: string, id: string): void;
-  history(owner: string): HistoryEntry[];
-  historical(owner: string, revision: number): Program;
+  ): Awaitable<void>;
+  copies(owner: string): Awaitable<SavedCopy[]>;
+  saveCopy(owner: string, expected: number, name: string): Awaitable<void>;
+  copy(owner: string, id: string): Awaitable<Program>;
+  deleteCopy(owner: string, id: string): Awaitable<void>;
+  history(owner: string): Awaitable<HistoryEntry[]>;
+  historical(owner: string, revision: number): Awaitable<Program>;
 }
 export class StorageError extends Error {}
 export class StorageConflict extends StorageError {}
@@ -59,6 +62,7 @@ function decode(value: unknown): Program {
 
 /** Local plaintext SQLite, private filesystem permissions. Cookie capabilities are hashed, not stored raw. */
 export class SqliteReviewRepository implements ReviewRepository {
+  readonly kind = "local-sqlite" as const;
   #db: DatabaseSync;
   constructor(path: string) {
     const dir = dirname(path);

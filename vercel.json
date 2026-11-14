@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm ci --include=dev --ignore-scripts --engine-strict",
+  "buildCommand": "npm run typecheck && node scripts/build-vercel.mjs",
+  "outputDirectory": "public",
+  "regions": ["iad1"],
+  "functions": {
+    "api/app.ts": { "maxDuration": 60, "includeFiles": "{web,src,server}/**" }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api/app?__route=home" },
+    { "source": "/app", "destination": "/api/app?__route=app" },
+    { "source": "/guided", "destination": "/api/app?__route=guided" },
+    { "source": "/workspace", "destination": "/api/app?__route=workspace" },
+    { "source": "/edit", "destination": "/api/app?__route=edit" },
+    {
+      "source": "/statement.json",
+      "destination": "/api/app?__route=statement"
+    },
+    { "source": "/review.html", "destination": "/api/app?__route=review" },
+    { "source": "/api/health", "destination": "/api/app?__route=health" },
+    { "source": "/welcome", "destination": "/api/app?__route=welcome" }
+  ]
+}

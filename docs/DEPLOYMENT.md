@@ -2,6 +2,16 @@
 
 These are operator configuration instructions, not a claim that a public service is deployed or production/account-based SaaS is complete. Review identity/recovery, data retention, capacity/abuse and financial-data privacy before exposing the app. Cookie capability access is not verified identity or authenticated funder approval.
 
+## Vercel adapter
+
+The hosted app uses a separate private Vercel Blob store, **not SQLite in the ephemeral function filesystem**. `vercel.json` builds static assets and routes approved paths to `api/app.ts`. The root strict typecheck runs during build; the API's separate transpilation-only config avoids a Vercel compiler-context issue without disabling the strict root check. The browser entry script is named `landing-client.js` in source to avoid a compiled renderer/client basename collision.
+
+Production environment needs its own `BLOB_READ_WRITE_TOKEN` and sensitive 64-hex `CLOSEOUT_DATA_KEY`. Keep these only in that project's server environment. No token/key is embedded in frontend assets, source or snapshots. Trusted platform deployment/production URL metadata supplies an exact HTTPS origin allowlist; request/forwarded values cannot invent one.
+
+Each request uses a fresh encrypted repository with conditional ETag writes. AES-256-GCM binds each object to its path. Stable origin-bound CSRF works across cold functions; normal revision protection remains. A shared rate budget and per-workspace lease bound receipt checks. One MiB plaintext/workspace and 128 workspaces bound storage, with up to 20 pinned copies and up to 30 recovery revisions inside the byte budget. The service operator holds the encryption key; this is not end-to-end privacy, authenticated accounts or funder approval. Data does not auto-expire; lost keys/cookies require backups/recovery planning.
+
+Hobby quotas are finite and shared at account level. Keep the app/store separate from unrelated projects, do not auto-upgrade, and do not claim unlimited availability. Quota/save errors must remain errors, not memory-only fallback success. Local mode remains SQLite and retains its previous data; Vercel does not upload or migrate a private local database automatically.
+
 ## Default: loopback only
 
 With no public origin configured, startup binds `127.0.0.1`, accepts only its exact loopback Host/Origin and uses `.local/closeout.sqlite`. Local cookies and access behavior remain unchanged.

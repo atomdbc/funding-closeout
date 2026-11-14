@@ -1,8 +1,8 @@
 # Third-party notices
 
-The MIT license in `LICENSE` covers this project's original code, not third-party packages, the Node.js runtime or external data sources. Dependencies retain their own licenses. There are no npm runtime dependencies.
+The MIT license in `LICENSE` covers this project's original code, not third-party packages, the Node.js runtime or external data sources. Dependencies retain their own licenses. The Vercel adapter uses pinned `@vercel/blob` 2.9.0 (Apache-2.0), https://github.com/vercel/storage . Its npm distribution and lockfile-pinned transitive dependencies retain their upstream licenses. A compatible `zod` 4.6.6 override fixes the audited transitive oversized-collection validation advisory; no audit/security guarantee is implied. Local SQLite startup does not import the Blob adapter.
 
-Pinned development dependencies:
+Pinned build/test dependencies (Node type definitions are also installed for deployment compilation):
 
 | Package            | Version | License    | Upstream                                           |
 | ------------------ | ------- | ---------- | -------------------------------------------------- |

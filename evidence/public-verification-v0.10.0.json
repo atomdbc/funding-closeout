@@ -1,0 +1,45 @@
+{
+  "version": "0.10.0",
+  "verifiedAt": "2026-11-14T16:41:07.026900+00:00",
+  "scope": "Reviewed source-only export and fresh install/check; public HTTPS checks use isolated synthetic QA program inputs, never customer/grant evidence",
+  "command": "npm ci --ignore-scripts --engine-strict && npm run check",
+  "formatPassed": true,
+  "strictTypecheckPassed": true,
+  "unitHttpTestsPassed": 143,
+  "browserTestsPassed": 49,
+  "sourceManifestFiles": 73,
+  "sourceDigestSha256": "cf44f2035d2d1d4dc40cc6aa303297d5d541d95063a1361d54bcd904988c1f31",
+  "sourceDigestAlgorithm": "SHA256 sorted relative filename NUL file bytes NUL",
+  "url": "https://funding-closeout.vercel.app",
+  "deploymentId": "dpl_Dq5p4XdR5qSf4Pc2QTqKUDwXQtPQ",
+  "publicHttpsChecks": {
+    "customerCreateTermsCheckExplainObligationsScopeExport": true,
+    "realReadOnlyRpcThirdPartyTransferUSDC": "4.045481",
+    "syntheticProposalTestOnly": "3.454519",
+    "coldBrowserResume": true,
+    "browserIsolation": true,
+    "secureHostOnlyCookie": true,
+    "duplicateFieldsStatus": 400,
+    "wrongOriginStatus": 403,
+    "concurrentConditionalWrites": [
+      303,
+      409
+    ],
+    "responsiveAxe": [
+      "375-light",
+      "375-dark",
+      "1280-light",
+      "1280-dark"
+    ]
+  },
+  "storage": "Separate private Blob store, server-side AES-256-GCM with operator-held key and conditional ETag writes; no SQLite on ephemeral functions",
+  "limits": "128 workspaces, 1 MiB/workspace, up to20 copies/up to30 bounded history, finite provider Hobby quotas; browser capability is not account login",
+  "packageAuditKnownAdvisories": 0,
+  "boundaries": {
+    "accountLoginImplemented": false,
+    "humanAcceptance": false,
+    "independentAudit": false,
+    "eventSubmitted": false,
+    "walletSigningOrSpending": false
+  }
+}
