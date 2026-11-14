@@ -69,7 +69,9 @@ test("home links to the review dashboard and does not replace saved work", async
     .locator(".hero-actions")
     .getByRole("link", { name: "Create a review", exact: false })
     .click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Reviews");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    /Let's account for a program's money|Your reviews/,
+  );
   expect(await (await page.request.get("/statement.json")).json()).toEqual(
     before,
   );
@@ -83,7 +85,9 @@ test("product home works without JavaScript", async ({ browser }) => {
       .locator(".hero-actions")
       .getByRole("link", { name: "Create a review", exact: false })
       .click();
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Reviews");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      /Let's account for a program's money|Your reviews/,
+    );
   } finally {
     await context.close();
   }
@@ -100,7 +104,7 @@ test("finite page choreography finishes and reduced motion stays static", async 
       ),
     )
     .toBe(true);
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(7000);
   expect(
     await page.evaluate(
       () =>

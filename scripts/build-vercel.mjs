@@ -9,6 +9,7 @@ writeFileSync(
 for (const [source, target] of [
   ["web/app.js", "public/app.js"],
   ["web/landing.css", "public/welcome.css"],
+  ["web/flow.css", "public/flow.css"],
   ["web/landing-client.js", "public/landing.js"],
   [
     "web/assets/hanken-grotesk-variable.ttf",

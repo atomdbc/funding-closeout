@@ -1,24 +1,50 @@
 # Funding closeout
 
-**Close your program. Explain every USDC.** Create a review for a funded program, record the terms and payments, account for unpaid obligations and export an unsigned closeout for human review.
+**Close a funded program with an explanation for its money, not just a list of transactions.**
 
-This source provides a working, bounded review workflow with read-only NEAR mainnet checks. It does not connect a wallet, sign, move funds, authenticate funder approval or automatically return money. A public transfer proves movement, not purpose, ownership, work completion or legal entitlement.
+Built at **NEAR HACKATHON 2026**. Live app: **https://funding-closeout.vercel.app** · License: MIT.
 
-## Hosted application
+## The problem
 
-**https://funding-closeout.vercel.app** — hosted on Vercel with a separate private encrypted Blob store. New visitors start empty; no wallet connection or product sample is required. Browser capability access is not an account login; keep downloaded backups. No paid-plan upgrade or on-chain write is required.
+When a grant, bounty program or DAO-funded initiative ends, the funder asks three questions: where did the money go, what is still owed, and is anything left to return? Today program managers answer them by hand from block explorers, spreadsheets and invoices. A common mistake is treating the remaining wallet balance as "unused" or "refundable" funding, when part of it may already be owed to contributors.
 
-Actual HTTPS customer-flow, public read-only RPC, export, cold-browser resume, independent-browser isolation, secure-cookie, invalid-Origin/duplicate-body rejection and concurrent-write checks were run with isolated, explicitly synthetic QA program inputs. Those checks are not human acceptance, an audit, customer activity, funding or a submitted contest entry.
+## The product
 
-## Use your own records
+Funding closeout is a hosted workflow for the program manager:
 
-1. Open **Your reviews** and create a review with the program name and public NEAR treasury account.
-2. Enter actual approved funding, funding received, reported closing balance and the funding terms. Unknowns are not inferred from a transaction.
-3. Check each program USDC transaction. The app locks checked movement facts separately from your explanation/evidence references.
-4. Explain payments and record unpaid obligations, including amounts owed outside the wallet.
-5. Confirm the program/period coverage, review blockers and download the unsigned HTML packet or full JSON.
+1. Create a review for one program and its public NEAR treasury account.
+2. Record the funding terms and reported totals (approved, received, closing balance).
+3. Check each USDC payment against NEAR mainnet.
+4. Explain what each payment was for and reference supporting evidence.
+5. Record money still owed (unpaid obligations).
+6. Declare what the review covers (program and period).
+7. Resolve blockers and export an unsigned closeout packet (HTML, printable to PDF, plus full JSON).
 
-New workspaces are empty, not fictional examples. There is no sample/demo entry or known-transaction prefill. Existing older fictional data remains honestly labeled; it is not converted into real evidence. Creating another working review is confirmed and preserves a named copy when SQLite is enabled. Reopening a copy/import clears review/scope declarations for rechecking.
+Missing terms, unexplained payments, incomplete scope, cash discrepancies or uncovered obligations block any return proposal. Unknown is never treated as zero. All money math is exact six-decimal USDC (BigInt), with no rounding or currency conversion.
+
+## How NEAR fits in
+
+The app reads NEAR mainnet through the public archival RPC (`https://archival-rpc.mainnet.near.org`) to confirm each payment's final facts: payer, recipient, amount and successful receipt execution of a Circle native USDC `ft_transfer` (contract `17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1`). It also follows Sputnik DAO and relayer payouts, where the signer and the paying account differ. Checked chain facts are locked separately from the human explanation, so the packet shows what the chain proves (money moved) apart from what the reporter claims (why it moved). No wallet connection, signing or fund movement is needed. Code: `src/near/verify.ts`, `src/near/facts.ts`, `src/near/review.ts`.
+
+## Try it (do X, see Y)
+
+1. Open https://funding-closeout.vercel.app and choose **Create a review**. You see a two-field form (program name, NEAR treasury account) and a preview of the six steps. No money is pre-filled.
+2. Enter a program name and a public NEAR treasury account, then **Create review**. You land on step 1, **The deal**. The **Money picture** panel on the right shows "Not entered", not zero.
+3. Enter the approved, received and closing amounts, choose what happens to unused money, say where the terms are written, then **Save and continue**. The panel now shows whether received − paid out = closing balance.
+4. On **Payments**, paste a USDC transaction hash sent from that account and choose **Check on NEAR and add**. The payment appears with a **Checked on NEAR** badge and its payer, recipient and exact amount locked. To test with a real public transfer, use treasury account `dclv2.ref-labs.near` and transaction `HdnpGYxucfKSz9h5xcEczEazUC51aimH45s24t3wXDMK` (4.045481 USDC). This is a third-party public transfer used only to test the check; it is not our program or funds.
+5. Jump to **Report** without explaining the payment. You see **Not ready yet**, "Possibly returnable: Not established" and a **Finish these first** list, each item linking to the step that fixes it.
+6. On **Explain**, say what the payment was for and where the proof is, tick the check box and **Save explanation**. On **Still owed**, add anything still unpaid. On **Coverage**, confirm both statements and **Save and see the report**.
+7. With nothing missing, the report shows **Ready for review** and the possibly returnable amount. **Download review packet** gives a readable unsigned report (print to PDF); **Download statement** gives the full JSON backup.
+
+## Hackathon build disclosure
+
+- **Built during the event window.** All code in this repository was written on November 13–14, 2026, after the hackathon start. There is no pre-hackathon baseline code; the first commit (tag `v0.3.1`) and every later commit fall inside the window. Final submission state is tagged `hackathon-submission`.
+- **AI-generated code.** Most of the application code, tests and documentation in this repository were generated with AI coding assistants (OpenAI Codex and Claude Code). The author directed the product decisions, reviewed the results and tested the live workflow.
+- **Libraries and templates.** No starter template was used. Runtime dependency: `@vercel/blob` 2.9.0 (hosted storage adapter only). Development/test dependencies: TypeScript, Playwright, axe-core, Prettier and Node type definitions. The interface font is Hanken Grotesk (SIL OFL). Full list with versions and licenses: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Local storage uses Node's built-in SQLite.
+
+## Limits
+
+This is a working, bounded review tool, not a full account-based SaaS. Access is tied to a browser cookie (no login, password recovery, teams or billing yet), so keep downloaded backups. It does not authenticate invoices, verify funder approval or execute refunds. A public transfer proves movement, not purpose, ownership, work completion or legal entitlement. The app trusts a fixed public HTTPS archival RPC rather than doing independent light-client verification.
 
 ## Run locally
 
@@ -75,4 +101,4 @@ Playwright uses installed Chrome/Chromium and its owned test port 5323; no autom
 
 Original source is [MIT](LICENSE); [third-party notices](THIRD_PARTY_NOTICES.md) and bundled font OFL remain their own. The package is `private` only to prevent accidental npm publication.
 
-Built for NEAR HACKATHON 2026. This source does not establish a hosted service, human public demo, event submission, eligibility, award or final consent. No reused external application/contract baseline is claimed. Submission requirements must be satisfied separately by the actual team.
+Built at NEAR HACKATHON 2026. No reused external application or contract baseline. See [Hackathon build disclosure](#hackathon-build-disclosure).

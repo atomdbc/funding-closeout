@@ -59,7 +59,9 @@ test("fresh customer creates a named review with no seeded money, payments or sa
     .locator(".hero-actions")
     .getByRole("link", { name: "Create a review", exact: false })
     .click();
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Reviews");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    /Let's account for a program's money|Your reviews/,
+  );
   await expect(page.getByText("No reviews yet", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("link", { name: /sample|example|demo/i }),
@@ -75,9 +77,9 @@ test("fresh customer creates a named review with no seeded money, payments or sa
     .click();
   await expect(page).toHaveURL(/step=terms/);
   for (const label of [
-    "Approved amount",
-    "Funding received",
-    "Reported closing balance",
+    "Approved by the funder",
+    "Actually received",
+    "Left in the treasury now",
   ])
     await expect(page.getByLabel(label, { exact: true })).toHaveValue("");
   const j = await (await page.request.get(appURL + "/statement.json")).json();
@@ -92,85 +94,77 @@ test("customer completes funding, checked payment, obligation, scope and unsigne
 }) => {
   await create(page, appURL);
   for (const [label, value] of [
-    ["Approved amount", "1000"],
-    ["Funding received", "1000"],
-    ["Reported closing balance", "950"],
+    ["Approved by the funder", "1000"],
+    ["Actually received", "1000"],
+    ["Left in the treasury now", "950"],
     [
-      "Approved terms and reference",
+      "Where are these terms written?",
       "TEST-AGREEMENT: return unused funding after obligations",
     ],
   ])
     await page.getByLabel(label!, { exact: true }).fill(value!);
   await page
-    .getByLabel("What do the terms say?", { exact: true })
+    .getByLabel("What happens to money that isn't used?", { exact: true })
     .selectOption("return-unspent");
   await page
-    .getByRole("button", { name: "Save funding terms", exact: true })
+    .getByRole("button", { name: "Save and continue", exact: true })
     .click();
+  await expect(page).toHaveURL(/step=source/);
+  await page.getByLabel("Transaction hash", { exact: true }).fill(HASH);
   await page
-    .getByRole("link", { name: "Next: Add payments", exact: true })
+    .getByRole("button", { name: "Check on NEAR and add", exact: true })
     .click();
-  await page.getByLabel("NEAR transaction hash", { exact: true }).fill(HASH);
+  await expect(page).toHaveURL(/step=source/);
+  await expect(page.locator("#added")).toContainText("Checked on NEAR");
+  await page.getByRole("link", { name: "Next: Explain", exact: true }).click();
+  await expect(page.locator(".f-facts")).toContainText("test fixture");
   await page
-    .getByRole("button", { name: "Check and add transfer", exact: true })
-    .click();
-  await expect(page).toHaveURL(/step=payments/);
-  await expect(
-    page.getByText("Synthetic test fixture — not live verification", {
-      exact: true,
-    }),
-  ).toBeVisible();
-  await page
-    .getByLabel("How should this payment be treated?", { exact: true })
+    .getByLabel("What kind of payment was this?", { exact: true })
     .selectOption("expense");
   await page
-    .getByLabel("What did this payment cover?", { exact: true })
+    .getByLabel("What did it pay for?", { exact: true })
     .fill("Support work");
   await page
-    .getByLabel("Supporting evidence", { exact: true })
+    .getByLabel("Where's the proof?", { exact: true })
     .fill("TEST-INVOICE — synthetic evidence");
   await page
-    .getByLabel("I reviewed this explanation and its supporting evidence.", {
+    .getByLabel("I've checked this explanation and its proof.", {
       exact: true,
     })
     .check();
-  await page.getByRole("button", { name: "Save payment", exact: true }).click();
   await page
-    .getByRole("link", { name: "Next: Unpaid obligations", exact: true })
+    .getByRole("button", { name: "Save explanation", exact: true })
     .click();
   await page
-    .getByRole("button", { name: "Add commitment", exact: true })
+    .getByRole("link", { name: "Next: Still owed", exact: true })
     .click();
   await page
-    .getByLabel("Who is still owed?", { exact: true })
-    .fill("Contributor");
-  await page.getByLabel("Remaining amount", { exact: true }).fill("250");
+    .getByRole("button", { name: "Add something still owed", exact: true })
+    .click();
+  await page.getByLabel("Who is owed?", { exact: true }).fill("Contributor");
   await page
-    .getByLabel("What is still owed or to be delivered?", { exact: true })
+    .getByLabel("How much is still unpaid?", { exact: true })
+    .fill("250");
+  await page
+    .getByLabel("What is it for?", { exact: true })
     .fill("Documentation");
   await page
-    .getByLabel("Commitment evidence", { exact: true })
+    .getByLabel("Where's the proof?", { exact: true })
     .fill("TEST-AGREEMENT");
   await page
-    .getByLabel("I reviewed the remaining obligation and its evidence.", {
+    .getByLabel("I've checked this amount and its proof.", {
       exact: true,
     })
     .check();
-  await page
-    .getByRole("button", { name: "Save commitment", exact: true })
-    .click();
-  await page
-    .getByRole("link", { name: "Next: Scope checks", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("link", { name: "Next: Coverage", exact: true }).click();
   await page.locator("#coverage-form [name=paymentsComplete]").check();
   await page.locator("#coverage-form [name=commitmentsComplete]").check();
   await page
-    .getByRole("button", { name: "Save scope confirmations", exact: true })
+    .getByRole("button", { name: "Save and see the report", exact: true })
     .click();
-  await page
-    .getByRole("link", { name: "Next: Review result", exact: true })
-    .click();
-  await expect(page.locator(".proposal-amount")).toHaveText("700 USDC");
+  await expect(page).toHaveURL(/step=result/);
+  await expect(page.locator(".f-verdict-amount")).toHaveText("700 USDC");
   const [download] = await Promise.all([
     page.waitForEvent("download"),
     page
@@ -182,15 +176,13 @@ test("customer completes funding, checked payment, obligation, scope and unsigne
   expect(packet).toContain("700 USDC");
   expect(packet).toContain("SYNTHETIC TEST FIXTURES");
   await page
-    .getByRole("link", { name: "Back to reviews", exact: true })
+    .getByRole("link", { name: "Back to your reviews", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: "Community work", exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("link", { name: "Continue review", exact: true })
-    .click();
-  await expect(page.locator(".proposal-amount")).toHaveText("700 USDC");
+  await page.getByRole("link", { name: /Continue review/ }).click();
+  await expect(page.locator(".f-verdict-amount")).toHaveText("700 USDC");
 });
 
 test("validation and unsaved-step protection keep user work", async ({
@@ -216,9 +208,7 @@ test("validation and unsaved-step protection keep user work", async ({
     .getByRole("button", { name: "Create review", exact: true })
     .click();
   await page.getByLabel("Program name", { exact: true }).fill("Unsaved change");
-  await page
-    .getByRole("link", { name: "Next: Add payments", exact: true })
-    .click();
+  await page.getByRole("link", { name: "Next: Payments", exact: true }).click();
   await expect(page.locator("#unsaved-warning")).toBeVisible();
   await expect(page).toHaveURL(/step=terms/);
 });
@@ -274,10 +264,10 @@ test("customer creation works without JavaScript", async ({
     const page = await context.newPage();
     await create(page, appURL);
     await expect(
-      page.getByLabel("Approved amount", { exact: true }),
+      page.getByLabel("Approved by the funder", { exact: true }),
     ).toHaveValue("");
     await expect(
-      page.getByRole("link", { name: "Next: Add payments", exact: true }),
+      page.getByRole("link", { name: "Next: Payments", exact: true }),
     ).toBeVisible();
   } finally {
     await context.close();

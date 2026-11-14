@@ -274,6 +274,7 @@ export function createApp(
   ]);
   const js = readFileSync(asset("app.js"));
   const landingCss = readFileSync(asset("landing.css"));
+  const flowCss = readFileSync(asset("flow.css"));
   const landingJs = readFileSync(asset("landing-client.js"));
   const landingFont = readFileSync(asset("assets/hanken-grotesk-variable.ttf"));
   const server = createServer(
@@ -323,11 +324,14 @@ export function createApp(
       const query = new URL(request.url ?? "/", "http://localhost")
         .searchParams;
       let flow: ReturnType<typeof guideStep> | undefined;
+      let nextStep: ReturnType<typeof guideStep> | undefined;
       const returningToReviews = query.get("return") === "reviews";
       try {
         if (path === "/guided") flow = guideStep(query);
         if (path === "/edit" && query.has("flow"))
           flow = guideStep(query, "flow");
+        if (path === "/edit" && flow && query.has("next"))
+          nextStep = guideStep(query, "next");
         if (flow) {
           if (query.has("sample"))
             throw new Error(
@@ -369,6 +373,8 @@ export function createApp(
         );
       if (path === "/welcome.css")
         return send(response, 200, "text/css; charset=utf-8", landingCss);
+      if (path === "/flow.css")
+        return send(response, 200, "text/css; charset=utf-8", flowCss);
       if (path === "/landing.js")
         return send(response, 200, "text/javascript; charset=utf-8", landingJs);
       if (path === "/assets/hanken-grotesk-variable.ttf")
@@ -789,7 +795,7 @@ export function createApp(
                 : returningToReviews
                   ? "/app"
                   : flow
-                    ? `/guided?step=${action === "check-transfer" ? "payments" : flow}`
+                    ? `/guided?step=${nextStep ?? (action === "check-transfer" ? "source" : flow)}${action === "check-transfer" ? "#added" : ""}`
                     : `/workspace#${encodeURIComponent(action === "check-transfer" ? `payment-${result.program.payments.at(-1)!.id}` : form)}`,
             "Cache-Control": "no-store",
           });
